@@ -1,4 +1,4 @@
-use crate::{Database, Event, EventKind, SweepStrategy};
+use crate::salsa::{Database, Event, EventKind, SweepStrategy};
 use lock_api::{RawRwLock, RawRwLockRecursive};
 use log::debug;
 use parking_lot::{Mutex, RwLock};
@@ -227,7 +227,7 @@ where
         let new_revision = Revision {
             generation: 1 + old_revision as u64,
         };
-        debug!("increment_revision: incremented to {:?}", new_revision);
+        // debug!("increment_revision: incremented to {:?}", new_revision);
 
         op(new_revision)
     }
@@ -242,7 +242,7 @@ where
         descriptor: &DB::QueryDescriptor,
         execute: impl FnOnce() -> V,
     ) -> ComputedQueryResult<DB, V> {
-        debug!("{:?}: execute_query_implementation invoked", descriptor);
+        // debug!("{:?}: execute_query_implementation invoked", descriptor);
 
         db.salsa_event(|| Event {
             runtime_id: db.salsa_runtime().id(),
@@ -310,7 +310,7 @@ where
 
     /// Obviously, this should be user configurable at some point.
     pub(crate) fn report_unexpected_cycle(&self, descriptor: DB::QueryDescriptor) -> ! {
-        debug!("report_unexpected_cycle(descriptor={:?})", descriptor);
+        // debug!("report_unexpected_cycle(descriptor={:?})", descriptor);
 
         let local_state = self.local_state.borrow();
         let LocalState { query_stack, .. } = &*local_state;
@@ -414,7 +414,10 @@ where
         fmt.debug_struct("SharedState")
             .field("query_lock", &query_lock)
             .field("revision", &self.revision)
-            .field("pending_revision_increments", &self.pending_revision_increments)
+            .field(
+                "pending_revision_increments",
+                &self.pending_revision_increments,
+            )
             .finish()
     }
 }

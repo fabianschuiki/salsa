@@ -1,16 +1,16 @@
-use crate::plumbing::CycleDetected;
-use crate::plumbing::InputQueryStorageOps;
-use crate::plumbing::QueryStorageMassOps;
-use crate::plumbing::QueryStorageOps;
-use crate::plumbing::UncheckedMutQueryStorageOps;
-use crate::runtime::ChangedAt;
-use crate::runtime::Revision;
-use crate::runtime::StampedValue;
-use crate::Database;
-use crate::Event;
-use crate::EventKind;
-use crate::Query;
-use crate::SweepStrategy;
+use super::plumbing::CycleDetected;
+use super::plumbing::InputQueryStorageOps;
+use super::plumbing::QueryStorageMassOps;
+use super::plumbing::QueryStorageOps;
+use super::plumbing::UncheckedMutQueryStorageOps;
+use super::runtime::ChangedAt;
+use super::runtime::Revision;
+use super::runtime::StampedValue;
+use super::Database;
+use super::Event;
+use super::EventKind;
+use super::Query;
+use super::SweepStrategy;
 use log::debug;
 use parking_lot::RwLock;
 use rustc_hash::FxHashMap;
@@ -148,12 +148,12 @@ where
         key: &Q::Key,
         _descriptor: &DB::QueryDescriptor,
     ) -> bool {
-        debug!(
-            "{:?}({:?})::maybe_changed_since(revision={:?})",
-            Q::default(),
-            key,
-            revision,
-        );
+        // debug!(
+        //     "{:?}({:?})::maybe_changed_since(revision={:?})",
+        //     Q::default(),
+        //     key,
+        //     revision,
+        // );
 
         let changed_at = {
             let map_read = self.map.read();
@@ -166,12 +166,12 @@ where
                 })
         };
 
-        debug!(
-            "{:?}({:?}): changed_at = {:?}",
-            Q::default(),
-            key,
-            changed_at,
-        );
+        // debug!(
+        //     "{:?}({:?}): changed_at = {:?}",
+        //     Q::default(),
+        //     key,
+        //     changed_at,
+        // );
 
         changed_at.changed_since(revision)
     }
@@ -207,7 +207,7 @@ where
     DB: Database,
 {
     fn set(&self, db: &DB, key: &Q::Key, descriptor: &DB::QueryDescriptor, value: Q::Value) {
-        log::debug!("{:?}({:?}) = {:?}", Q::default(), key, value);
+        // log::debug!("{:?}({:?}) = {:?}", Q::default(), key, value);
 
         self.set_common(db, key, descriptor, value, IsConstant(false))
     }

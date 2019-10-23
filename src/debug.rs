@@ -1,10 +1,10 @@
 //! Debugging APIs: these are meant for use when unit-testing or
 //! debugging your application but aren't ordinarily needed.
 
-use crate::plumbing;
-use crate::plumbing::QueryStorageOps;
-use crate::Query;
-use crate::QueryTable;
+use crate::salsa::plumbing;
+use crate::salsa::plumbing::QueryStorageOps;
+use crate::salsa::Query;
+use crate::salsa::QueryTable;
 use std::iter::FromIterator;
 
 /// Additional methods on queries that can be used to "peek into"

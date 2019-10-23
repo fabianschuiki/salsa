@@ -1,18 +1,18 @@
 #![allow(missing_docs)]
 
-use crate::Database;
-use crate::Query;
-use crate::QueryTable;
-use crate::QueryTableMut;
-use crate::SweepStrategy;
+use super::Database;
+use super::Query;
+use super::QueryTable;
+use super::QueryTableMut;
+use super::SweepStrategy;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-pub use crate::derived::DependencyStorage;
-pub use crate::derived::MemoizedStorage;
-pub use crate::derived::VolatileStorage;
-pub use crate::input::InputStorage;
-pub use crate::runtime::Revision;
+pub use super::derived::DependencyStorage;
+pub use super::derived::MemoizedStorage;
+pub use super::derived::VolatileStorage;
+pub use super::input::InputStorage;
+pub use super::runtime::Revision;
 
 pub struct CycleDetected;
 

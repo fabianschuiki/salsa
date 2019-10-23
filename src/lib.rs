@@ -1,6 +1,8 @@
 #![warn(rust_2018_idioms)]
 #![warn(missing_docs)]
 #![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 
 //! The salsa crate is a crate for incremental recomputation.  It
 //! permits you to define a "database" of queries with both inputs and
@@ -18,17 +20,17 @@ pub mod debug;
 #[doc(hidden)]
 pub mod plumbing;
 
-use crate::plumbing::CycleDetected;
-use crate::plumbing::InputQueryStorageOps;
-use crate::plumbing::QueryStorageMassOps;
-use crate::plumbing::QueryStorageOps;
-use crate::plumbing::UncheckedMutQueryStorageOps;
+use self::plumbing::CycleDetected;
+use self::plumbing::InputQueryStorageOps;
+use self::plumbing::QueryStorageMassOps;
+use self::plumbing::QueryStorageOps;
+use self::plumbing::UncheckedMutQueryStorageOps;
 use derive_new::new;
 use std::fmt::{self, Debug};
 use std::hash::Hash;
 
-pub use crate::runtime::Runtime;
-pub use crate::runtime::RuntimeId;
+pub use self::runtime::Runtime;
+pub use self::runtime::RuntimeId;
 
 /// The base trait which your "query context" must implement. Gives
 /// access to the salsa runtime, which you must embed into your query
@@ -577,11 +579,11 @@ macro_rules! query_group {
         }];
         lifetime[];
     ) => {
-        $($trait_attr)* $v trait $query_trait: $($crate::plumbing::GetQueryTable<$QueryType> +)* $($header)* {
+        $($trait_attr)* $v trait $query_trait: $($crate::salsa::plumbing::GetQueryTable<$QueryType> +)* $($header)* {
             $(
                 $(#[$method_attr])*
                 fn $method_name(&self, $($key_name: $key_ty),*) -> $value_ty {
-                    <Self as $crate::plumbing::GetQueryTable<$QueryType>>::get_query_table(self)
+                    <Self as $crate::salsa::plumbing::GetQueryTable<$QueryType>>::get_query_table(self)
                         .get(($($key_name),*))
                 }
             )*
@@ -591,7 +593,7 @@ macro_rules! query_group {
             #[derive(Default, Debug)]
             $v struct $QueryType;
 
-            impl<DB> $crate::Query<DB> for $QueryType
+            impl<DB> $crate::salsa::Query<DB> for $QueryType
             where
                 DB: $query_trait,
             {
@@ -630,11 +632,11 @@ macro_rules! query_group {
         }];
         lifetime[$lt:lifetime];
     ) => {
-        $($trait_attr)* $v trait $query_trait<$lt>: $($crate::plumbing::GetQueryTable<$QueryType<$lt>> +)* $($header)* {
+        $($trait_attr)* $v trait $query_trait<$lt>: $($crate::salsa::plumbing::GetQueryTable<$QueryType<$lt>> +)* $($header)* {
             $(
                 $(#[$method_attr])*
                 fn $method_name(&self, $($key_name: $key_ty),*) -> $value_ty {
-                    <Self as $crate::plumbing::GetQueryTable<$QueryType<$lt>>>::get_query_table(self)
+                    <Self as $crate::salsa::plumbing::GetQueryTable<$QueryType<$lt>>>::get_query_table(self)
                         .get(($($key_name),*))
                 }
             )*
@@ -650,7 +652,7 @@ macro_rules! query_group {
                 }
             }
 
-            impl<$lt, DB> $crate::Query<DB> for $QueryType<$lt>
+            impl<$lt, DB> $crate::salsa::Query<DB> for $QueryType<$lt>
             where
                 DB: $query_trait<$lt>,
             {
@@ -730,11 +732,11 @@ macro_rules! query_group {
             lifetime($($lts:lifetime)*);
         ]
     ) => {
-        impl<$($lts,)* DB> $crate::plumbing::QueryFunction<DB> for $QueryType
+        impl<$($lts,)* DB> $crate::salsa::plumbing::QueryFunction<DB> for $QueryType
         where DB: $DbTrait
         {
-            fn execute(db: &DB, $key_name: <Self as $crate::Query<DB>>::Key)
-                       -> <Self as $crate::Query<DB>>::Value
+            fn execute(db: &DB, $key_name: <Self as $crate::salsa::Query<DB>>::Key)
+                       -> <Self as $crate::salsa::Query<DB>>::Value
             {
                 $fn_path(db, $key_name)
             }
@@ -754,11 +756,11 @@ macro_rules! query_group {
             lifetime($($lts:lifetime)*);
         ]
     ) => {
-        impl<$($lts,)* DB> $crate::plumbing::QueryFunction<DB> for $QueryType
+        impl<$($lts,)* DB> $crate::salsa::plumbing::QueryFunction<DB> for $QueryType
         where DB: $DbTrait
         {
-            fn execute(db: &DB, ($($key_name),*): <Self as $crate::Query<DB>>::Key)
-                       -> <Self as $crate::Query<DB>>::Value
+            fn execute(db: &DB, ($($key_name),*): <Self as $crate::salsa::Query<DB>>::Key)
+                       -> <Self as $crate::salsa::Query<DB>>::Value
             {
                 $fn_path(db, $($key_name),*)
             }
@@ -792,25 +794,25 @@ macro_rules! query_group {
     (
         @storage_ty[$DB:ident, $Self:ident, memoized]
     ) => {
-        $crate::plumbing::MemoizedStorage<$DB, $Self>
+        $crate::salsa::plumbing::MemoizedStorage<$DB, $Self>
     };
 
     (
         @storage_ty[$DB:ident, $Self:ident, volatile]
     ) => {
-        $crate::plumbing::VolatileStorage<$DB, $Self>
+        $crate::salsa::plumbing::VolatileStorage<$DB, $Self>
     };
 
     (
         @storage_ty[$DB:ident, $Self:ident, dependencies]
     ) => {
-        $crate::plumbing::DependencyStorage<$DB, $Self>
+        $crate::salsa::plumbing::DependencyStorage<$DB, $Self>
     };
 
     (
         @storage_ty[$DB:ident, $Self:ident, input]
     ) => {
-        $crate::plumbing::InputStorage<$DB, $Self>
+        $crate::salsa::plumbing::InputStorage<$DB, $Self>
     };
 
     (
@@ -862,7 +864,7 @@ macro_rules! database_storage {
             )*
         }
     ) => {
-        $crate::database_storage! {
+        $crate::salsa::src::database_storage! {
             @STRUCT_IMPL
             $(#[$attr])*
             $v struct $Storage [] for $Database {
@@ -924,7 +926,7 @@ macro_rules! database_storage {
         $v struct $Storage<$($lts)*> {
             $(
                 $(
-                    $query_method: <$QueryType as $crate::Query<$Database>>::Storage,
+                    $query_method: <$QueryType as $crate::salsa::Query<$Database>>::Storage,
                 )*
             )*
         }
@@ -945,24 +947,24 @@ macro_rules! database_storage {
         enum __SalsaQueryDescriptorKind<$($lts)*> {
             $(
                 $(
-                    $query_method(<$QueryType as $crate::Query<$Database>>::Key),
+                    $query_method(<$QueryType as $crate::salsa::Query<$Database>>::Key),
                 )*
             )*
         }
 
-        impl<$($lts)*> $crate::plumbing::DatabaseStorageTypes for $Database {
+        impl<$($lts)*> $crate::salsa::plumbing::DatabaseStorageTypes for $Database {
             type QueryDescriptor = __SalsaQueryDescriptor<$($lts)*>;
             type DatabaseStorage = $Storage<$($lts)*>;
         }
 
-        impl<$($lts)*> $crate::plumbing::DatabaseOps for $Database {
+        impl<$($lts)*> $crate::salsa::plumbing::DatabaseOps for $Database {
             fn for_each_query(
                 &self,
-                mut op: impl FnMut(&dyn $crate::plumbing::QueryStorageMassOps<Self>),
+                mut op: impl FnMut(&dyn $crate::salsa::plumbing::QueryStorageMassOps<Self>),
             ) {
                 $(
                     $(
-                        op(&$crate::Database::salsa_runtime(self)
+                        op(&$crate::salsa::Database::salsa_runtime(self)
                            .storage()
                            .$query_method);
                     )*
@@ -970,19 +972,19 @@ macro_rules! database_storage {
             }
         }
 
-        impl<$($lts)*> $crate::plumbing::QueryDescriptor<$Database> for __SalsaQueryDescriptor<$($lts)*> {
+        impl<$($lts)*> $crate::salsa::plumbing::QueryDescriptor<$Database> for __SalsaQueryDescriptor<$($lts)*> {
             fn maybe_changed_since(
                 &self,
                 db: &$Database,
-                revision: $crate::plumbing::Revision,
+                revision: $crate::salsa::plumbing::Revision,
             ) -> bool {
                 match &self.kind {
                     $(
                         $(
                             __SalsaQueryDescriptorKind::$query_method(key) => {
-                                let runtime = $crate::Database::salsa_runtime(db);
+                                let runtime = $crate::salsa::Database::salsa_runtime(db);
                                 let storage = &runtime.storage().$query_method;
-                                <_ as $crate::plumbing::QueryStorageOps<$Database, $QueryType>>::maybe_changed_since(
+                                <_ as $crate::salsa::plumbing::QueryStorageOps<$Database, $QueryType>>::maybe_changed_since(
                                     storage,
                                     db,
                                     revision,
@@ -1059,13 +1061,13 @@ macro_rules! database_storage {
             fn $tail_query_method:ident() for $TailQueryType:path;
         )*
     ) => {
-        impl<$($lts)*> $crate::plumbing::GetQueryTable<$QueryType> for $Database {
+        impl<$($lts)*> $crate::salsa::plumbing::GetQueryTable<$QueryType> for $Database {
             fn get_query_table(
                 db: &Self,
-            ) -> $crate::QueryTable<'_, Self, $QueryType> {
-                $crate::QueryTable::new(
+            ) -> $crate::salsa::QueryTable<'_, Self, $QueryType> {
+                $crate::salsa::QueryTable::new(
                     db,
-                    &$crate::Database::salsa_runtime(db)
+                    &$crate::salsa::Database::salsa_runtime(db)
                         .storage()
                         .$query_method,
                 )
@@ -1073,11 +1075,11 @@ macro_rules! database_storage {
 
             fn get_query_table_mut(
                 db: &mut Self,
-            ) -> $crate::QueryTableMut<'_, Self, $QueryType> {
+            ) -> $crate::salsa::QueryTableMut<'_, Self, $QueryType> {
                 let db = &*db;
-                $crate::QueryTableMut::new(
+                $crate::salsa::QueryTableMut::new(
                     db,
-                    &$crate::Database::salsa_runtime(db)
+                    &$crate::salsa::Database::salsa_runtime(db)
                         .storage()
                         .$query_method,
                 )
@@ -1085,8 +1087,8 @@ macro_rules! database_storage {
 
             fn descriptor(
                 _db: &Self,
-                key: <$QueryType as $crate::Query<Self>>::Key,
-            ) -> <Self as $crate::plumbing::DatabaseStorageTypes>::QueryDescriptor {
+                key: <$QueryType as $crate::salsa::Query<Self>>::Key,
+            ) -> <Self as $crate::salsa::plumbing::DatabaseStorageTypes>::QueryDescriptor {
                 __SalsaQueryDescriptor {
                     kind: __SalsaQueryDescriptorKind::$query_method(key),
                 }

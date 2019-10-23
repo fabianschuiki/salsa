@@ -1,16 +1,16 @@
-use crate::plumbing::CycleDetected;
-use crate::plumbing::QueryDescriptor;
-use crate::plumbing::QueryFunction;
-use crate::plumbing::QueryStorageMassOps;
-use crate::plumbing::QueryStorageOps;
-use crate::plumbing::UncheckedMutQueryStorageOps;
-use crate::runtime::ChangedAt;
-use crate::runtime::FxIndexSet;
-use crate::runtime::Revision;
-use crate::runtime::Runtime;
-use crate::runtime::RuntimeId;
-use crate::runtime::StampedValue;
-use crate::{Database, Event, EventKind, SweepStrategy};
+use super::plumbing::CycleDetected;
+use super::plumbing::QueryDescriptor;
+use super::plumbing::QueryFunction;
+use super::plumbing::QueryStorageMassOps;
+use super::plumbing::QueryStorageOps;
+use super::plumbing::UncheckedMutQueryStorageOps;
+use super::runtime::ChangedAt;
+use super::runtime::FxIndexSet;
+use super::runtime::Revision;
+use super::runtime::Runtime;
+use super::runtime::RuntimeId;
+use super::runtime::StampedValue;
+use super::{Database, Event, EventKind, SweepStrategy};
 use log::{debug, info};
 use parking_lot::Mutex;
 use parking_lot::RwLock;
@@ -252,12 +252,12 @@ where
         // doing any `set` invocations while the query function runs.
         let revision_now = runtime.current_revision();
 
-        info!(
-            "{:?}({:?}): invoked at {:?}",
-            Q::default(),
-            key,
-            revision_now,
-        );
+        // info!(
+        //     "{:?}({:?}): invoked at {:?}",
+        //     Q::default(),
+        //     key,
+        //     revision_now,
+        // );
 
         // First, do a check with a read-lock.
         match self.probe(db, self.map.read(), runtime, revision_now, descriptor, key) {
@@ -308,11 +308,11 @@ where
         // inputs and check whether they are out of date.
         if let Some(memo) = &mut old_memo {
             if let Some(value) = memo.validate_memoized_value(db, revision_now) {
-                info!(
-                    "{:?}({:?}): validated old memoized value",
-                    Q::default(),
-                    key
-                );
+                // info!(
+                //     "{:?}({:?}): validated old memoized value",
+                //     Q::default(),
+                //     key
+                // );
 
                 db.salsa_event(|| Event {
                     runtime_id: runtime.id(),
@@ -330,7 +330,7 @@ where
         // Query was not previously executed, or value is potentially
         // stale, or value is absent. Let's execute!
         let mut result = runtime.execute_query_implementation(db, descriptor, || {
-            info!("{:?}({:?}): executing query", Q::default(), key);
+            // info!("{:?}({:?}): executing query", Q::default(), key);
 
             if !self.should_track_inputs(key) {
                 runtime.report_untracked_read();
@@ -467,15 +467,15 @@ where
             }
 
             Some(QueryState::Memoized(memo)) => {
-                debug!("{:?}({:?}): found memoized value", Q::default(), key);
+                // debug!("{:?}({:?}): found memoized value", Q::default(), key);
 
                 if let Some(value) = memo.probe_memoized_value(revision_now) {
-                    info!(
-                        "{:?}({:?}): returning memoized value changed at {:?}",
-                        Q::default(),
-                        key,
-                        value.changed_at
-                    );
+                    // info!(
+                    //     "{:?}({:?}): returning memoized value changed at {:?}",
+                    //     Q::default(),
+                    //     key,
+                    //     value.changed_at
+                    // );
 
                     return ProbeState::UpToDate(Ok(value));
                 }
@@ -665,13 +665,13 @@ where
         let runtime = db.salsa_runtime();
         let revision_now = runtime.current_revision();
 
-        debug!(
-            "{:?}({:?})::maybe_changed_since(revision={:?}, revision_now={:?})",
-            Q::default(),
-            key,
-            revision,
-            revision_now,
-        );
+        // debug!(
+        //     "{:?}({:?})::maybe_changed_since(revision={:?}, revision_now={:?})",
+        //     Q::default(),
+        //     key,
+        //     revision,
+        //     revision_now,
+        // );
 
         // Acquire read lock to start. In some of the arms below, we
         // drop this explicitly.
@@ -753,14 +753,14 @@ where
             .iter()
             .flat_map(|inputs| inputs.iter())
             .filter(|input| input.maybe_changed_since(db, revision))
-            .inspect(|input| {
-                debug!(
-                    "{:?}({:?}): input `{:?}` may have changed",
-                    Q::default(),
-                    key,
-                    input
-                )
-            })
+            // .inspect(|input| {
+            //     debug!(
+            //         "{:?}({:?}): input `{:?}` may have changed",
+            //         Q::default(),
+            //         key,
+            //         input
+            //     )
+            // })
             .next()
             .is_some();
 
@@ -852,19 +852,19 @@ where
                 // other thread doing that work has unique access to
                 // this slot and we should not interfere.
                 QueryState::InProgress { .. } => {
-                    debug!("sweep({:?}({:?})): in-progress", Q::default(), key);
+                    // debug!("sweep({:?}({:?})): in-progress", Q::default(), key);
                     true
                 }
 
                 // Otherwise, keep only if it was used in this revision.
                 QueryState::Memoized(memo) => {
-                    debug!(
-                        "sweep({:?}({:?})): last verified at {:?}, current revision {:?}",
-                        Q::default(),
-                        key,
-                        memo.verified_at,
-                        revision_now
-                    );
+                    // debug!(
+                    //     "sweep({:?}({:?})): last verified at {:?}, current revision {:?}",
+                    //     Q::default(),
+                    //     key,
+                    //     memo.verified_at,
+                    //     revision_now
+                    // );
 
                     // Since we don't acquire a query lock in this
                     // method, it *is* possible for the revision to
@@ -953,11 +953,11 @@ where
                     .next();
 
                 if let Some(input) = changed_input {
-                    debug!(
-                        "{:?}::validate_memoized_value: `{:?}` may have changed",
-                        Q::default(),
-                        input
-                    );
+                    // debug!(
+                    //     "{:?}::validate_memoized_value: `{:?}` may have changed",
+                    //     Q::default(),
+                    //     input
+                    // );
 
                     return None;
                 }
@@ -980,10 +980,10 @@ where
     fn probe_memoized_value(&self, revision_now: Revision) -> Option<StampedValue<Q::Value>> {
         let value = self.value.as_ref()?;
 
-        debug!(
-            "probe_memoized_value(verified_at={:?}, changed_at={:?})",
-            self.verified_at, self.changed_at,
-        );
+        // debug!(
+        //     "probe_memoized_value(verified_at={:?}, changed_at={:?})",
+        //     self.verified_at, self.changed_at,
+        // );
 
         if self.verified_at == revision_now {
             let is_constant = match self.inputs {
