@@ -656,6 +656,7 @@ macro_rules! query_group {
             where
                 DB: $query_trait<$lt>,
             {
+                #[allow(unused_parens)]
                 type Key = ($($key_ty),*);
                 type Value = $value_ty;
                 type Storage = $crate::query_group! { @storage_ty[DB, Self, $($storage)*] };
