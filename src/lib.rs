@@ -1,4 +1,4 @@
-#![warn(rust_2018_idioms)]
+// #![warn(rust_2018_idioms)]
 #![warn(missing_docs)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
